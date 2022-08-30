@@ -1,10 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-
+const postRoutes = require("./routes/posts");
 const app = express();
-
-const Post = require("./models/post");
 
 mongoose
   .connect(
@@ -32,30 +30,6 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.post("/posts", (req, res, next) => {
-  const post = new Post({
-    title: req.body.title,
-    content: req.body.content,
-  });
-  post.save();
-  res.status(201).send({ message: "Post Created Successfully!" });
-});
-
-app.delete("/posts/:id", (req, res, next) => {
-  console.log(req.params.id);
-  Post.deleteOne({ _id: req.params.id }).then((result) => {
-    console.log(result);
-    res.status(200).send({ message: "Post Deleted Successfully!" });
-  });
-});
-
-app.use("/posts", (req, res, next) => {
-  Post.find().then((posts) => {
-    res.status(200).json({
-      message: "Post Fetch Sucess",
-      posts: posts,
-    });
-  });
-});
+app.use("/posts",postRoutes);
 
 module.exports = app;

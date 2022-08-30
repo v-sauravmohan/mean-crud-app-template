@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Post } from './post.model';
 import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ export class PostService {
   private posts: Post[] = [];
   private postUpdates = new Subject<Post[]>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   getPosts() {
     return this.http
@@ -28,7 +29,6 @@ export class PostService {
         })
       )
       .subscribe((posts) => {
-        console.log(posts);
         this.posts = posts;
         this.postUpdates.next([...this.posts]);
       });
@@ -38,23 +38,59 @@ export class PostService {
     return this.postUpdates;
   }
 
-  addPost(title: string, content: string) {
-    const post: Post = {
-      id: '',
-      title,
-      content,
-    };
+  addPost(title: string, content: string, file: File) {
+    const postData = new FormData();
+    postData.append("title", title);
+    postData.append('content', content);
+    postData.append('thumbnail', file, title);
     this.http
-      .post<{ message: string }>('http://localhost:3000/posts', post)
+      .post<{ message: string; post_id: string }>(
+        'http://localhost:3000/posts',
+        postData
+      )
       .subscribe((res) => {
+        const post: Post = {
+          id: res.post_id,
+          title,
+          content,
+        };
         this.posts.push(post);
+        this.postUpdates.next([...this.posts]);
+        this.redirectToHome();
+      });
+  }
+
+  deletePost(postId: string) {
+    this.http
+      .delete<{ message: string }>(`http://localhost:3000/posts/${postId}`)
+      .subscribe((res) => {
+        const updatedPosts = this.posts.filter((post) => post.id !== postId);
+        this.posts = updatedPosts;
         this.postUpdates.next([...this.posts]);
       });
   }
 
-  deletePost(postId: string){
-    this.http.delete<{message: string}>(`http://localhost:3000/posts/${postId}`).subscribe((res) => {
-      console.log(res.message);
-    })
+  getPost(postId: string) {
+    return this.http.get<{ _id: string; title: string; content: string }>(
+      `http://localhost:3000/posts/${postId}`
+    );
+  }
+
+  updatePost(postId: string, title: string, content: string) {
+    const post: Post = {
+      id: postId,
+      title: title,
+      content: content,
+    };
+    this.http
+      .put<{ message: string }>(`http://localhost:3000/posts/${postId}`, post)
+      .subscribe((res) => {
+        console.log(res);
+        this.redirectToHome();
+      });
+  }
+
+  redirectToHome() {
+    this.router.navigate(['/']);
   }
 }
