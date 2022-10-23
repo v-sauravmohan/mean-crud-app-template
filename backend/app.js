@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const postRoutes = require("./routes/posts");
 const app = express();
+const path = require("path");
 
 mongoose
   .connect(
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/thumbnails", express.static(path.join("backend/thumbnails")));
 
 app.use("/posts",postRoutes);
 

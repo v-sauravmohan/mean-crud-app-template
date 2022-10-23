@@ -24,6 +24,7 @@ export class PostService {
               title: post.title,
               content: post.content,
               id: post._id,
+              imagePath: post.imagePath
             };
           });
         })
@@ -44,15 +45,16 @@ export class PostService {
     postData.append('content', content);
     postData.append('thumbnail', file, title);
     this.http
-      .post<{ message: string; post_id: string }>(
+      .post<{ message: string; post: Post }>(
         'http://localhost:3000/posts',
         postData
       )
       .subscribe((res) => {
         const post: Post = {
-          id: res.post_id,
+          id: res.post.id,
           title,
           content,
+          imagePath: res.post.imagePath
         };
         this.posts.push(post);
         this.postUpdates.next([...this.posts]);
@@ -71,17 +73,29 @@ export class PostService {
   }
 
   getPost(postId: string) {
-    return this.http.get<{ _id: string; title: string; content: string }>(
+    return this.http.get<{ _id: string; title: string; content: string, imagePath: string }>(
       `http://localhost:3000/posts/${postId}`
     );
   }
 
-  updatePost(postId: string, title: string, content: string) {
-    const post: Post = {
-      id: postId,
-      title: title,
-      content: content,
-    };
+  updatePost(postId: string, title: string, content: string, image: File | string) {
+    let post: Post | FormData;
+    if (typeof(image) === "object") {
+      post = new FormData();
+      post.append("id", postId);
+      post.append("title", title);
+      post.append('content', content);
+      post.append('thumbnail', image, title);
+
+    } else {
+      post = {
+        id: postId,
+        title: title,
+        content: content,
+        thumbnail: image
+      };
+    }
+
     this.http
       .put<{ message: string }>(`http://localhost:3000/posts/${postId}`, post)
       .subscribe((res) => {
