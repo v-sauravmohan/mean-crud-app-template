@@ -9,29 +9,32 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class PostService {
-  private posts: Post[] = [];
-  private postUpdates = new Subject<Post[]>();
+  private postUpdates = new Subject<{posts: Post[]; count: number}>();
+  private postData:{posts: Post[]; count: number};
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  getPosts() {
+  getPosts(postsPerPage: number, currentPage: number) {
+    const queryParams = `?pagesize=${postsPerPage}&page=${currentPage + 1}`;
     return this.http
-      .get<{ message: string; posts: any }>('http://localhost:3000/posts')
+      .get<{ message: string; posts: any; count: number }>('http://localhost:3000/posts'+ queryParams)
       .pipe(
         map((postData) => {
-          return postData.posts.map((post) => {
+          return {
+            posts: postData.posts.map((post) => {
             return {
               title: post.title,
               content: post.content,
               id: post._id,
               imagePath: post.imagePath
-            };
-          });
-        })
+            }
+          }),
+          count: postData.count
+        }})
       )
-      .subscribe((posts) => {
-        this.posts = posts;
-        this.postUpdates.next([...this.posts]);
+      .subscribe((transformedPostData) => {
+        this.postData = transformedPostData;
+        this.postUpdates.next(this.postData);
       });
   }
 
@@ -50,26 +53,13 @@ export class PostService {
         postData
       )
       .subscribe((res) => {
-        const post: Post = {
-          id: res.post.id,
-          title,
-          content,
-          imagePath: res.post.imagePath
-        };
-        this.posts.push(post);
-        this.postUpdates.next([...this.posts]);
         this.redirectToHome();
       });
   }
 
   deletePost(postId: string) {
-    this.http
-      .delete<{ message: string }>(`http://localhost:3000/posts/${postId}`)
-      .subscribe((res) => {
-        const updatedPosts = this.posts.filter((post) => post.id !== postId);
-        this.posts = updatedPosts;
-        this.postUpdates.next([...this.posts]);
-      });
+    return this.http
+      .delete<{ message: string }>(`http://localhost:3000/posts/${postId}`);
   }
 
   getPost(postId: string) {

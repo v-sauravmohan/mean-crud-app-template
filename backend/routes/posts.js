@@ -45,22 +45,26 @@ router.delete("/:id", (req, res, next) => {
   });
 });
 
-router.put("/:id",multer({ storage }).single("thumbnail"), (req, res, next) => {
-  let imagePath = req.body.thumbnail;
-  if(req.file) {
-    const url = req.protocol + "://" + req.get("host");
-    imagePath =  url + "/thumbnails/" + req.file.filename;
+router.put(
+  "/:id",
+  multer({ storage }).single("thumbnail"),
+  (req, res, next) => {
+    let imagePath = req.body.thumbnail;
+    if (req.file) {
+      const url = req.protocol + "://" + req.get("host");
+      imagePath = url + "/thumbnails/" + req.file.filename;
+    }
+    const post = new Post({
+      _id: req.params.id,
+      title: req.body.title,
+      content: req.body.content,
+      imagePath: imagePath,
+    });
+    Post.updateOne({ _id: req.params.id }, post).then((result) => {
+      res.status(200).json({ message: "Post Updated Successfully!" });
+    });
   }
-  const post = new Post({
-    _id: req.params.id,
-    title: req.body.title,
-    content: req.body.content,
-    imagePath: imagePath
-  });
-  Post.updateOne({ _id: req.params.id }, post).then((result) => {
-    res.status(200).json({ message: "Post Updated Successfully!" });
-  });
-});
+);
 
 router.get("/:id", (req, res, next) => {
   Post.findById(req.params.id)
@@ -75,10 +79,22 @@ router.get("/:id", (req, res, next) => {
 });
 
 router.use("", (req, res, next) => {
-  Post.find().then((posts) => {
+  console.log(req.query)
+  const pageSize = +req.query.pagesize;
+  const currentPage = +req.query.page;
+  const postQuery = Post.find();
+  let fetchedPosts;
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+  }
+  postQuery.then((posts) => {
+    fetchedPosts = posts;
+    return Post.count();
+  }).then(count => {
     res.status(200).json({
       message: "Post Fetch Sucess",
-      posts: posts,
+      posts: fetchedPosts,
+      count: count
     });
   });
 });
