@@ -42,7 +42,9 @@ router.post(
         message: "Post Created Successfully!",
         post: { ...createdPost, post_id: createdPost._id },
       })
-    );
+    ).catch(err => {
+      res.status(500).json({message: "Creating a post failed!"});
+    });
   }
 );
 
@@ -55,7 +57,9 @@ router.delete("/:id", checkAuth, (req, res, next) => {
         res.status(401).json({ message: "User Not Authorized!" });
       }
     }
-  );
+  ).catch(err => {
+    res.status(500).json({message: "Deleting post failed!"});
+  });;
 });
 
 router.put(
@@ -84,7 +88,9 @@ router.put(
       } else {
         res.status(401).json({ message: "User Not Authorized!" });
       }
-    });
+    }).catch(err => {
+      res.status(500).json({message: "Couldn't update post!"});
+    });;
   }
 );
 
@@ -97,7 +103,7 @@ router.get("/:id", (req, res, next) => {
         res.status(404).json({ message: "Post Not Found!" });
       }
     })
-    .catch(() => res.status(404).json({ message: "Post Not Found!" }));
+    .catch(() => res.status(500).json({ message: "Fetching post failed!" }));
 });
 
 router.use("", (req, res, next) => {
@@ -120,7 +126,9 @@ router.use("", (req, res, next) => {
         posts: fetchedPosts,
         count: count,
       });
-    });
+    }).catch(err => {
+      res.status(500).json({message: "Fetching posts failed!"});
+    });;
 });
 
 module.exports = router;

@@ -90,7 +90,6 @@ export class PostService {
     this.http
       .put<{ message: string }>(`http://localhost:3000/posts/${postId}`, post)
       .subscribe((res) => {
-        console.log(res);
         this.redirectToHome();
       });
   }

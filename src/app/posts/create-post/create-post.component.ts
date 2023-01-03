@@ -1,24 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 import { mimeType } from '../mime-type.validator';
 import { Post } from '../post.model';
 import { PostService } from '../post.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-post',
   templateUrl: './create-post.component.html',
   styleUrls: ['./create-post.component.css'],
 })
-export class CreatePostComponent implements OnInit {
+export class CreatePostComponent implements OnInit, OnDestroy {
   private mode = 'create';
   private postId = '';
   post: Post;
   isLoading = false;
   form: FormGroup;
   thumbnailPreview: string;
+  authStatusSub: Subscription;
 
-  constructor(private postService: PostService, public route: ActivatedRoute) {}
+  constructor(private postService: PostService, public route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.form = new FormGroup({
@@ -54,6 +57,8 @@ export class CreatePostComponent implements OnInit {
         this.postId = '';
       }
     });
+
+    this.authStatusSub = this.authService.getAutStatusListener().subscribe(isAuth => this.isLoading = false);
   }
 
   onSavePost() {
@@ -89,5 +94,9 @@ export class CreatePostComponent implements OnInit {
       this.thumbnailPreview = reader.result as string;
     };
     reader.readAsDataURL(file);
+  }
+
+  ngOnDestroy(): void {
+    this.authStatusSub.unsubscribe();
   }
 }

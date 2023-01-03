@@ -21,11 +21,14 @@ export class AuthService {
       email: email,
       password: password,
     };
-    this.http
-      .post('http://localhost:3000/user/signup', authData)
-      .subscribe((response) => {
+    this.http.post('http://localhost:3000/user/signup', authData).subscribe(
+      (response) => {
         this.login(email, password);
-      });
+      },
+      (err) => {
+        this.authStatusListener.next(false);
+      }
+    );
   }
 
   login(email: string, password: string) {
@@ -34,7 +37,7 @@ export class AuthService {
       password: password,
     };
     this.http
-      .post<{ token: string; expiresIn: number, userId: string }>(
+      .post<{ token: string; expiresIn: number; userId: string }>(
         'http://localhost:3000/user/login',
         authData
       )
@@ -53,7 +56,7 @@ export class AuthService {
           this.saveAuthData(this.token, expirationDate, this.userId);
           this.router.navigate(['/']);
         }
-      });
+      }, (err) => this.authStatusListener.next(false));
   }
 
   getToken() {
@@ -108,7 +111,7 @@ export class AuthService {
       return {
         token: token,
         expirationDate: new Date(expirationDate),
-        userId: userId
+        userId: userId,
       };
     }
   }
@@ -116,7 +119,7 @@ export class AuthService {
   private saveAuthData(token: string, expirationDate: Date, userId: string) {
     localStorage.setItem('token', token);
     localStorage.setItem('expiration', expirationDate.toISOString());
-    localStorage.setItem('userId', userId)
+    localStorage.setItem('userId', userId);
   }
 
   private clearAuthData() {
