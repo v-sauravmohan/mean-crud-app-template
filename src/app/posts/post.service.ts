@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { Post } from './post.model';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,13 +12,14 @@ import { Router } from '@angular/router';
 export class PostService {
   private postUpdates = new Subject<{posts: Post[]; count: number}>();
   private postData:{posts: Post[]; count: number};
+  private postEndpoint = `${environment.apiEndpoint}/posts`;
 
   constructor(private http: HttpClient, private router: Router) {}
 
   getPosts(postsPerPage: number, currentPage: number) {
     const queryParams = `?pagesize=${postsPerPage}&page=${currentPage + 1}`;
     return this.http
-      .get<{ message: string; posts: any; count: number }>('http://localhost:3000/posts'+ queryParams)
+      .get<{ message: string; posts: any; count: number }>(this.postEndpoint + queryParams)
       .pipe(
         map((postData) => {
           return {
@@ -50,7 +52,7 @@ export class PostService {
     postData.append('thumbnail', file, title);
     this.http
       .post<{ message: string; post: Post }>(
-        'http://localhost:3000/posts',
+        this.postEndpoint ,
         postData
       )
       .subscribe((res) => {
@@ -60,12 +62,12 @@ export class PostService {
 
   deletePost(postId: string) {
     return this.http
-      .delete<{ message: string }>(`http://localhost:3000/posts/${postId}`);
+      .delete<{ message: string }>(`${this.postEndpoint}/${postId}`);
   }
 
   getPost(postId: string) {
     return this.http.get<{ _id: string; title: string; content: string, imagePath: string }>(
-      `http://localhost:3000/posts/${postId}`
+      `${this.postEndpoint}/${postId}`
     );
   }
 
@@ -88,7 +90,7 @@ export class PostService {
     }
 
     this.http
-      .put<{ message: string }>(`http://localhost:3000/posts/${postId}`, post)
+      .put<{ message: string }>(`${this.postEndpoint}/${postId}`, post)
       .subscribe((res) => {
         this.redirectToHome();
       });

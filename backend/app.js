@@ -8,7 +8,7 @@ const path = require("path");
 
 mongoose
   .connect(
-    "mongodb+srv://mean-admin:YB7noW7ii4iMrhm7@cluster0.g1uv1yt.mongodb.net/mean-course?retryWrites=true&w=majority"
+    `mongodb+srv://mean-admin:${process.env.MONGO_ATLAS_PASSWORD}@cluster0.g1uv1yt.mongodb.net/mean-course?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log("Connected to Database");

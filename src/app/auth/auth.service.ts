@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 import { AuthData } from './auth-data.model';
 
 @Injectable({
@@ -13,6 +14,7 @@ export class AuthService {
   private authStatusListener = new Subject<boolean>();
   private tokenTimer: any;
   private userId: string;
+  private authEndpoint = `${environment.apiEndpoint}/user`;
 
   constructor(public http: HttpClient, private router: Router) {}
 
@@ -21,7 +23,7 @@ export class AuthService {
       email: email,
       password: password,
     };
-    this.http.post('http://localhost:3000/user/signup', authData).subscribe(
+    this.http.post(`${this.authEndpoint}/signup`, authData).subscribe(
       (response) => {
         this.login(email, password);
       },
@@ -38,7 +40,7 @@ export class AuthService {
     };
     this.http
       .post<{ token: string; expiresIn: number; userId: string }>(
-        'http://localhost:3000/user/login',
+        `${this.authEndpoint}/login`,
         authData
       )
       .subscribe((response) => {
