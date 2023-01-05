@@ -1,4 +1,4 @@
-# MeanCourse
+# MEAN CRUD Boiler Plate 
 
 This project consist of a backend and frontend, Boiler plate for a MEAN-CRUD application. The project is titled "My Posts" where a user can do all of the CRUD operations with posts. Authentication and Authorization has been implemented with the help of a JWT token which enables users to log in and out of the application.
 The frontend project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.12.
