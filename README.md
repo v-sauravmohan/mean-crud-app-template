@@ -1,14 +1,15 @@
 # MeanCourse
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.12.
+This project consist of a backend and frontend, Boiler plate for a MEAN-CRUD application. The project is titled "My Posts" where a user can do all of the CRUD operations with posts. Authentication and Authorization has been implemented with the help of a JWT token which enables users to log in and out of the application.
+The frontend project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.12.
+The backend project is a NodeJS server with Express JS as the framework.
+Mongo Atlas used as the Database.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Allow current IP on mongo db network access section.
+Run `npm run start:server` for the backend dev server.
+Run `npm start` for the frontend dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Build
 
